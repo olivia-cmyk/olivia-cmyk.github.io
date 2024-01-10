@@ -4,15 +4,86 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
 
-    <title>Example Student's HCDE 439 Physical Computing Page!</title>
+    <title>Shi-Wen Olivia Yau's HCDE 439 Physical Computing Page!</title>
 
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
-    <h1>Example Student's Assignment 1!</h1>
+    <h1>Shi-Wen Olivia Yau's Assignment 1</h1>
     <div class="header">
-      <img src="red-panda.jpg" />
-      <p>Here is all the documentation for assignment 1!</p>
+      <img src="a1_schematic.png"/>
+      <div>
+        <h2>Schematic</h2>
+        <p>To get each of the LEDs to blink independently, I used 3 different power sources
+          the Arduino so that I could code each one to turn on/off separately for different
+          lengths of time.
+      </div>
+      </p>
+    </div>
+
+    <div class="header">
+      <img src="a1_circuitimage.jpg" />
+      <div>
+        <h2>Circuit Image</h2>
+        <p>For my circuit, I used 3 red LEDs and 3 220 Ohm resistors. I chose 220 Ohms because
+          I calculated that the LEDs being on at the ideal 20 mA current would require 160 Ohm resistors
+          which I did not have. 220 Ohms resulted in 14 mA current, still sufficiently turning on the lights.
+        </p>
+        <pre>
+
+5-1.8 Volts = 0.02 Amperes * R
+3.2 Volts / 0.02 Amperes = 160 Ohms
+          
+3.2 Volts = ? Amperes * 220 Ohms
+Current = 0.014 Amperes
+        </pre>
+      </div>
+    </div>
+
+    <div class="header">
+      <img src="a1_circuitgif.gif" width="200"/>
+      <div>
+        <h2>Circuit GIF</h2>
+        <p>As per the schematic, each LED has its own power source connected to its anode and
+          its cathode goes to ground to complete the circuit.
+        </p>
+      </div>
+    </div>
+
+    <div class="header">
+      <pre>
+        <code>
+void setup() {
+  pinMode(12, OUTPUT); //initializes pin 12 as output
+  pinMode(7, OUTPUT); //initializes pin 7 as output
+  pinMode(4, OUTPUT); //initializes pin 4 as output
+}
+
+void loop() {
+  digitalWrite(12, HIGH); //turns LED connected to pin 12 on with high voltage
+  delay(80); //pin 12 LED waits for 8/100 of a second
+  digitalWrite(12, LOW); //pin 12 LED turns off with low voltage
+  delay(80); //pin 12 LED waits for 8/100 of a second
+
+  digitalWrite(7, HIGH); //turns LED connected to pin 7 on with high voltage
+  delay(300);//pin 7 LED waits for 3/10 of a second
+  digitalWrite(7, LOW); //pin 7 LED turns off with low voltage
+  delay(300);//pin 7 LED waits for 3/10 of a second
+
+  digitalWrite(4, HIGH); //turns LED connected to pin 4 on with high voltage
+  delay(200);//pin 4 LED waits for 2/10 of a second
+  digitalWrite(4, LOW); //pin 4 LED turns off with low voltage
+  delay(200);//pin 4 LED waits for 2/10 of a second
+}
+        </code>
+      </pre>
+      <div>
+        <h2>Arduino Code Sketch</h2>
+        <p>In the code setup, I initialized each of the pins I wanted to use as a power source.
+          Then in the loop, I cycled through each pin making the LED connected to it turn on for
+          a fraction of a second, then wait before the next one turned on.
+        </p>
+      </div>
     </div>
   </body>
 </html>
