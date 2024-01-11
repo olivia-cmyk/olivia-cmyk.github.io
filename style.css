@@ -72,10 +72,17 @@ h2 {
   margin-top: 0.5em;
 }
 
-.container {
+.qna {
   display: grid;
   align-items: center; 
-  grid-template-columns: 1fr 1fr 1fr;
-  column-gap: 5px;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1em;
+  margin-top: 1em;
+  row-gap: 1em;
  }
+
+ .qna img {
+  width: 50%;
+  object-fit: cover;
+}
  

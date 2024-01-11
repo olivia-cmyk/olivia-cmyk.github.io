@@ -14,11 +14,11 @@
       <img src="a1_schematic.png"/>
       <div>
         <h2>Schematic</h2>
-        <p>To get each of the LEDs to blink independently, I used 3 different power sources
+        <p>To get each of the LEDs to blink independently, I used 3 different power sources/pins from
           the Arduino so that I could code each one to turn on/off separately for different
           lengths of time.
+        </p>
       </div>
-      </p>
     </div>
 
     <div class="header">
@@ -84,6 +84,26 @@ void loop() {
           a fraction of a second, then wait before the next one turned on.
         </p>
       </div>
+    </div>
+
+    <br>
+    <h2>Additional Questions:</h2>
+
+    <div class="qna">
+      <h3>Question 1: Draw a graph where the X axis is time and the Y axis is voltage across
+      the LEDs. Draw a line for each of your 3 LEDs.
+      </h3>
+      <img src="red-panda.jpg"/>
+      <h3>Question 2: How many LEDs could you blink independently with your Arduino?
+      How much current would that draw?</h3>
+      <p>13 LEDs. If using the 220 Ohm resistors, they would collectively draw 182 mA (14mA * 13 LEDs)
+        of current.
+      </p>
+      <h3>Question 4: How fast do you need to blink your LEDs until you no longer can tell
+      that they are blinking?</h3>
+      <p>The LEDs would have to blink at a speed of around 12 milliseconds on/off to
+      no longer be distinguishable from a stable light.
+      </p>
     </div>
   </body>
 </html>
