@@ -4,15 +4,179 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
 
-    <title>Example Student's HCDE 439 Physical Computing Page!</title>
+    <title>Shi-Wen Olivia Yau's HCDE 439 Physical Computing Page!</title>
 
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
-    <h1>Example Student's Assignment 2!</h1>
+    <h1>Shi-Wen Olivia Yau's Assignment 2</h1>
     <div class="header">
-      <img src="red-panda.jpg" />
-      <p>Here is all the documentation for assignment 2!</p>
+      <img src="a2_schematic.png"/>
+      <div>
+        <h2>Schematic</h2>
+        <p>I used Pin 2 to take the reading from the button (to tell if it was pushed),
+          and Pins 13 and 11 to control different RGB LEDs in the colors of turquoise (G+B) and
+          purple (R+B). While the button was pushed, the purple LED was meant to fade on and
+          off while the turquoise LED stayed on. Both LEDs turned off when the button was released.
+        </p>
+      </div>
+    </div>
+
+    <div class="header">
+      <img src="a2_circuitimage.jpg" />
+      <div>
+        <h2>Circuit Image</h2>
+        <p>For my circuit, I used 2 RGB LEDs and 1 button. For the button, I used a 10k Ohm resistor
+          because this is the ideal resistance for a pull-down resistor because it prevents short circuiting
+          while the button is pushed down and pulls down the input to ground when the button is not pushed.
+
+          For the purple LED, I used 220 Ohm resistors. At the ideal 20 mA current, the R LED would require 160
+          a Ohm resistor and the B LED would require 135 Ohms. Because I did not have these exact resistors, I chose
+          220 Ohms, resulting in a 14mA (R) and 7.7mA (B) current. This means that my purple LED has a more red hue to it than 
+          blue because I over-resisted the blue.
+          
+          For the turquoise LED, I used 1k Ohm resistors. I initially used 220 Ohm resistors, but the LED seemed too
+          bright to me compared to the purple one and I wanted it to be slightly dimmer. The ideal resistor for B and G
+          LEDs would be 135 Ohms, but with the 1k Ohm resistors, I got 1.7 mA of current for each LED. This dimmed the light slightly
+          to a level I was satisfied with.
+        </p>
+        <pre>
+
+PURPLE LED CALCULATIONS:
+5-1.8 Volts = 0.02 Amperes * R
+R = 160 Ohms
+5-3.3 Volts = 0.02 Amperes * R
+R = 135 Ohms
+
+//Red LED:
+3.2 Volts = ? Amperes * 220 Ohms
+I = 0.014 Amperes
+//Blue LED:
+1.7 Volts = ? Amperes * 220 Ohms
+I = 0.0077 Amperes
+
+TURQUOISE LED CALCULATIONS:
+5-3.3 Volts = 0.02 Amperes * R
+R = 135 Ohms
+
+//Green and Blue LED:
+1.7 Volts = ? Amperes * 1000 Ohms
+I = 0.0017 Amperes
+        </pre>
+      </div>
+    </div>
+
+    <div class="header">
+      <img src="a2_circuitgif.gif"/>
+      <div>
+        <h2>Circuit GIF</h2>
+        <p>As per the schematic, the button is connected to a 5V power source, as well as a 10k Ohm resistor,
+          with Pin 2 collected readings from the button. Each LED is connected to resistors and individual pins
+          so that one can fade on/off while the other just turns on.
+        </p>
+      </div>
+    </div>
+
+    <br>
+    <h2>Arduino Code Sketch</h2>
+    <p>In my code, I first set up variables to make changing pins easier if needed, and 
+      initialized the pins to Outputs and Inputs as needed. In my loop, I made an if/else
+      loop for when the button is pushed vs not pushed.
+
+      In the if loop, I coded the turqouise LED to turn on, and used a for loop to fade the
+      purple LED on and off while the button is pushed.
+
+      In the else loop, I coded both LEDs to turn off.
+    </p>
+
+    <div class="header">
+      <pre>
+        <code>
+const int ledPin1 = 11; //sets LED to pin 11 (will be purple), can use analog write to fade
+const int ledPin2 = 13; //sets LED to pin 13 (will be turquoise), uses digital write function
+const int buttonPin = 2; //sets the button's pin to 2
+int buttonState = 0; //sets variable buttonState to be 0
+
+void setup() {
+  pinMode(ledPin1, OUTPUT); //sets pin 11 as an output pin
+  pinMode(ledPin2, OUTPUT); //sets pin 13 as an output pin
+  pinMode(buttonPin, INPUT); //sets pin 2 as an input pin
+
+}
+
+void loop() {
+  buttonState = digitalRead(buttonPin); //reads whether or not button is pushed (HIGH) or not (LOW), sets it to buttonState
+
+  //if loop for if the button is pressed
+  if (buttonState == HIGH) { //if button is pressed...
+    digitalWrite(ledPin2, HIGH); //turns on turquoise LED to high
+
+    //for loop to fade the purple LED on
+    for (int bright = 0; bright < 255; bright++) { //sets variable bright, active when bright < 255, bright inc. by 1 everytime it loops
+      analogWrite(ledPin1, bright); //turns on purple LED to the current value of bright
+      delay(9); //9/1000 second delay
+    }
+
+    analogWrite(ledPin1, 255); //turns on purple LED to brightest
+
+    //for loop to fade the purple LED off
+    for (int bright = 255; bright > 1; --bright) { //sets variable bright, active when bright > 1, bright decreases by 1 every time it loops
+      analogWrite(ledPin1, bright); //turns on purple LED to current value of bright
+      delay(9); //9/1000 second delay
+    }
+
+
+  } else { //else loop that is active when button is not being pushed.
+    digitalWrite(ledPin2, LOW); //turns turquoise LED to low
+    analogWrite(ledPin1, 0); //turns off purple LED (lowest brightness)
+  }
+
+}
+        </code>
+      </pre>
+    </div>
+
+    <br>
+    <h2>Additional Questions:</h2>
+
+    <div class="qna">
+      <h3>1: Draw a chart where the X axis is time and the Y axis is voltage.
+        Draw 3 lines representing the voltage across an LED with analogWrite(led, 64),
+        analogWrite(led, 128), and analogWrite(led,255).
+      </h3>
+      <div>
+        <pre>
+          <code>
+64/255 * 5V = 1.25V
+128/255 * 5V = 2.51V
+255/255 * 5V = 5V
+          </code>
+        </pre>
+        <img src="a2_qna_q1.png"/>
+      </div>
+      <h3>2: Given your schematic, circuit, and firmware, assuming the only thing that draws
+        current is your LEDs, how long would your circuit run if powered by a 1200 mAh
+        battery?
+      </h3>
+      <div>
+        <p>
+          (Accounting for resistors) Given the earlier calculations, the total current drawn
+          by the schematic would be 25.1 mA (additive b/c they are parallel).
+          This would mean that it would run for 47.8 hours on the battery.
+
+          However, if we assume that each LED is drawing 20 mA of current, then we would draw
+          a total of 80 mA. This would mean it would run for 15 hours.
+        </p>
+        <pre>
+          <code>
+14mA + 7.7mA + 1.7mA + 1.7mA = 25.1 mA current
+1200 mAh / 25.1 mA = 47.8 hours
+
+20mA * 4 = 80 mA
+1200 mAh / 80 mA = 15 hours
+          </code>
+        </pre>
+      </div>
     </div>
   </body>
 </html>
