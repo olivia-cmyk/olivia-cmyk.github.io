@@ -47,6 +47,11 @@ h2 {
   object-fit: cover;
 }
 
+.header video {
+  width: 50%;
+  object-fit: cover;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));

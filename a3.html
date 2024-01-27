@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+    <title>Shi-Wen Olivia Yau's HCDE 439 Physical Computing Page!</title>
+
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <h1>Shi-Wen Olivia Yau's Assignment 3</h1>
+    <div class="header">
+      <img src="a3_schematic.png"/>
+      <div>
+        <h2>Schematic</h2>
+        <p>I attached each LED to a different digital pin so they could fade independently.
+        The A0 analog pin is attached to the LDR to take readings of the voltage based on the
+        amount of light available to the LDR.
+        </p>
+      </div>
+    </div>
+
+    <div class="header">
+      <img src="a3_circuitimage.jpg" />
+      <div>
+        <h2>Circuit Image</h2>
+        <p>For my circuit, I used 2 yellow LEDs with 220 Ohm resistors, as well as a Light Dependent
+            Resistor with a 10k Ohm resistor. For a 20mA current, each yellow LED would need 160 Ohm resistors.
+            With the 220 Ohm resistors, their current would be 14mA. For the LDR, it is attached to a 10k
+            Ohm resistor in the case that the light available cuases the LDR to be 0 Ohms. 
+        </p>
+        <pre>
+
+5-1.8 Volts = 0.02 Amperes * R
+3.2 Volts / 0.02 Amperes = 160 Ohms
+          
+3.2 Volts = ? Amperes * 220 Ohms
+Current = 0.014 Amperes
+        </pre>
+      </div>
+    </div>
+
+    <div class="header">
+      <iframe class="header" src="https://youtube.com/embed/I9YpcCVyUVo" allowfullscreen></iframe>
+      <div>
+        <h2>Circuit Video </h2>
+        <h3>(Full Screen Allowed)</h1>
+        <p>As per the schematic, each LED is connected to a pin to fade on/off independently.
+            When the resistor is exposed to a lot of light, its resistance decreases and the A0
+            pin reads a higher number. This higher number correlates to a high number for the LEDs
+            (on a 0 to 255 scale). One LED thus increases in brightness while the other uses the opposite
+            brightness number (255-brightness) and dims. When the LED is not exposed to a lot of light,
+            the opposite happens.
+        </p>
+      </div>
+    </div>
+
+    <br>
+    <h2>Arduino Code Sketch</h2>
+    <p>In my code, I first set up variables to make changing pins easier if needed, 
+      initialized the pins to Outputs and Inputs as needed, and started the serial monitor.
+      Within the loop, I read the value from the sensing pin and contstrained and mapped it 
+      to appropriate values for the LEDs to use. It was constrained to 520 and 830 instead of 0
+      and 1023 because those are the min and max values that were being read when tested in a 
+      fairly lit room. If I had used 0 and 1023, the LEDs would not turn all the way on or off.
+      Finally, I turned on the LEDs based on this
+      number and wrote to the serial what the brightness number was, as well as whether each
+      LED was bright or not.
+    </p>
+
+    <div class="header">
+      <pre>
+        <code>
+const int sensorPin = A0; //sets variable to pin number A0
+const int led1 = 11; //sets variable to pin number 11
+const int led2 = 10; //sets variable to pin number 10
+
+void setup() {
+    pinMode(sensorPin, INPUT); //intializes sensorPin as an input pin
+    pinMode(led1, OUTPUT); //intializes led1 as an output pin
+    pinMode(led2, OUTPUT); //intializes led2 as an output pin
+    Serial.begin(9600); //starts the serial monitor
+}
+
+void loop() {
+    //sets value to be the reading from the sensor pin
+    int value = analogRead(sensorPin);
+    //sets sensingValue to be value, but constrained to 520-830, which is the min-max that the sensor generally reads
+    int sensingValue = constrain(value, 520, 830);
+    //maps value from sensor to a 0-255 number for LEDs to use
+    int outputValue = map(sensingValue, 520, 830, 0, 255);
+
+    //turns on led1 to the outputValue
+    analogWrite(led1, outputValue);
+    //turns on led2 to the opposite of the outputValue (ex. 240 when led1 is 15)
+    analogWrite(led2, (255-outputValue));
+
+    //writes to serial what the brightness of led1 is.
+    Serial.print("\n The brightness of the LED is ");
+    Serial.print(outputValue);
+    Serial.print("\t");
+
+    //writes to serial how bright each led is in grouping terms (very bright, very dim, off, etc.)
+    if (outputValue == 0) {Serial.print("LED1 is off, but LED2 is very bright.");}
+    if ((outputValue > 0) && (outputValue < 55)) {Serial.print("LED1 is very dim, but LED2 is very bright.");}
+    if ((outputValue >= 55) && (outputValue < 100)) {Serial.print("LED1 is dim, but LED2 is bright.");}
+    if ((outputValue >= 100) && (outputValue < 155)) {Serial.print("LED1 and LED2 are fairly bright.");}
+    if ((outputValue >= 155) && (outputValue < 200)) {Serial.print("LED1 is bright, but LED2 is dim.");}
+    if ((outputValue >= 200) && (outputValue < 255)) {Serial.print("LED1 is very bright, but LED2 is very dim.");}
+    if ((outputValue == 255)) {Serial.print("LED1 is very bright, but LED2 is off.");}
+
+    //waits 2/10 of a second
+    delay(200);
+}            
+        </code>
+      </pre>
+    </div>
+
+    <br>
+    <h2>Additional Questions:</h2>
+
+    <div class="qna">
+      <h3>1: In your voltage divider, can the variable resistor be either R1 or R2 or does
+        it need to be one or the other? Justify your answer with example calculations.
+      </h3>
+      <p>
+        Yes, in my schematic, the variable resistor is currently R1, but changing it to R2 will
+        still work. However, I might need to change to code as it changes the voltage that the
+        sensor reads.
+        <pre>
+            <code>
+                Example: In a lit room, the LDR = about 6k Ohms
+                Vout = Vin (R2/(R1+R2))
+
+                If photoresistor is R1:
+                5V (10k/(16k)) = 3.125 V
+
+                If photoresistor is R2:
+                5V (6k/16k) = 1.875 V
+            </code>
+        </pre>
+      </p>
+      <h3>2: Draw a graph where the x-axis is time and the y-axis is voltage. Plot the voltage
+        at V-measure of your voltage divider of your shared gif.
+      </h3>
+      <img src="a3_qna_q2.png">
+      <h3>3: AnalogWrite and analogRead are respectively 8-bit and 10-bit values. Imagine
+        you had 10-bit PWM and a 16-bit analog-to-digital converter instead. How would this
+        change your map() code? Explain your answer.</h3>
+      <p>
+        You would need to map the 16 bit values (max number being 65535) to
+        10 bit values (max being 1023).
+        The code would now be int outputValue = map(value, 0, 65535, 0, 1023); although I might have to constrain
+        the exact numbers so that my LEDs turn all the way off.
+      </p>
+    </div>
+  </body>
+</html>
