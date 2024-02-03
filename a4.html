@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+    <title>Shi-Wen Olivia Yau's HCDE 439 Physical Computing Page!</title>
+
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <h1>Shi-Wen Olivia Yau's Assignment 4</h1>
+    <div class="header">
+      <img src="a4_schematic.png"/>
+      <div>
+        <h2>Schematic</h2>
+        <p>The capacitor (metal sheet) is set up to be a touch sensitive capacitive sensor, attached to pins 4 (sending pin) and 2
+            (receiving pin), with a 1 Mohm resistor connecting them. The servo motor is connected to
+            ground, 5V power, and pin 9, which outputs PWM to the motor.
+        </p>
+      </div>
+    </div>
+
+    <div class="header">
+      <img src="a4_circuitimage.jpg" />
+      <div>
+        <h2>Circuit Image</h2>
+        <p>For my capacitor, I used a scrap metal sheet and a 1 Mohm resistor. I chose the 1 Mohm
+            resistor according to the capacitive sensor library documentation (https://playground.arduino.cc/Main/CapacitiveSensor/index-2.html)
+            to respond to absolute touch.
+        </p>
+      </div>
+    </div>
+
+    <div class="header">
+      <iframe class="header" src="https://youtube.com/embed/TQXRpIpPwZ0?" allowfullscreen></iframe>
+      <div>
+        <h2>Circuit Video </h2>
+        <h3>(Full Screen Allowed)</h1>
+        <p>When the capacitive sensor is touched, the send and recieve pin of the capacitor
+            time how long it takes for the recieve pin to match the send pin, which will return
+            larger or smaller numbers. The code maps these numbers to 0-180 angle degrees and moves
+            the motor to that degree.
+        </p>
+      </div>
+    </div>
+
+    <br>
+    <h2>Arduino Code Sketch</h2>
+    <p>In my code, I included the two libraries I was using and set them up with pins, as well as began the serial
+        monitor. Then, I get a reading from the capacitive sensor, constrain it to a min and max,
+        and map it to angles between 0 and 180. Then, I move the motor to that angle and wait 1 
+        second before taking a reading again.
+    </p>
+
+    <div class="header">
+      <pre>
+        <code>
+#include &lt;CapacitiveSensor.h&gt; //includes capacitive sensor library
+#include &lt;Servo.h&gt; //includes servo library
+
+//1 megohm resistor between pins 4 & 2 with pin 2 as the sensor
+CapacitiveSensor cs = CapacitiveSensor(4,2);
+//creates servo object
+Servo ms;
+
+void setup() {
+    //turns off autocalibrate
+    cs.set_CS_AutocaL_Millis(0xFFFFFFFF);
+    //begins serial monitor
+    Serial.begin(9600);
+
+    //attaches servo object to pin 9
+    ms.attach(9);
+}
+
+void loop() {
+
+    //gets reading from capacitive sensor with 30 samples
+    long input =  cs.capacitiveSensor(30);
+
+    //constrains the reading from the capacitive sensor to 70 and 1800
+    int constrainedInput = constrain(input, 70, 1800);
+    //maps the reading fro the capacitive sensor to angles for the servo motor
+    int servoPosition = map(constrainedInput, 70, 1800, 0, 180);
+    //sets servo postion (0-180)
+    ms.write(servoPosition);
+
+    //prints angle of servo motor
+    Serial.print(servoPosition);
+    //tab space
+    Serial.print("\t");
+    //prints reading of capacitive sensor
+    Serial.println(constrainedInput);
+    //1 second delay
+    delay(1000);
+
+}
+        
+        </code>
+      </pre>
+    </div>
+
+    <br>
+    <h2>Additional Questions:</h2>
+
+    <div class="qna">
+      <h3>1: Say you are using a servo motor you attach to pin 9. In your loop() you have the following code:
+        for (int i=0, i&lt;180, i++){servo.write(i); delay(100);}
+        Draw a graph with the X axis in seconds, for two seconds, and the y-axis the voltage at pin 9 with respect to ground.
+      </h3>
+      <div>
+        <img src="a4_qna_q1.png"/>
+      </div>
+      <h3>2: Your input device is slightly broken, leading it to give us an erroneous
+        reading 1% of the time. How can we address this? Answer in (pseudo)code.
+      </h3>
+      <pre>
+//creates long variable to sum inputs
+long sum = 0;
+
+//sums up last 15 readings at a time
+for (int i=0; i&lt;15; i++) {
+    long input =  cs.capacitiveSensor(30);
+    sum = sum + input;
+    delay(100);
+}
+
+//creates variable for smoothedInput
+int smoothedInput = (sum/15);
+
+----OR----
+
+//prevent too-high or too-low values
+int constInput = constrain(input, min, max);
+
+//now use the above smoothing code.
+      </pre>
+      <h3>3: Your input device is slightly noisy, leading the measurement to randomly
+        deviate from the true measurement up or down by 10%. How can we address this?
+        Answer in (pseudo)code.
+      </h3>
+      <pre>
+//this can also be addressed via smoothing.
+//creates long variable to sum inputs
+long sum = 0;
+
+//sums up last 15 readings at a time
+for (int i=0; i&lt;15; i++) {
+    long input =  cs.capacitiveSensor(30);
+    sum = sum + input;
+    delay(100);
+}
+
+//creates variable for smoothedInput
+int smoothedInput = (sum/15);
+      </pre>
+    </div>
+  </body>
+</html>
