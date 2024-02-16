@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+    <title>Shi-Wen Olivia Yau's HCDE 439 Physical Computing Page!</title>
+
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <h1>Shi-Wen Olivia Yau's Assignment 5</h1>
+    <div class="header">
+      <img src="a5_schematic.jpg"/>
+      <div>
+        <h2>Schematic</h2>
+        <p>The capacitor (metal sheet) is set up to be a touch sensitive capacitive sensor, attached to pins 4 (sending pin) and 2
+            (receiving pin), with a 1 Mohm resistor connecting them. The LED strip is connected to
+            an external power supply and N-MOSFET transistor. The max current that the transistor can handle
+            is 32A. According to the LED strip box, the LED strips only draw 1.5A of current.
+        </p>
+      </div>
+    </div>
+
+    <div class="header">
+      <img src="a5_circuitimage.jpg" />
+      <div>
+        <h2>Circuit Image</h2>
+        <p>For my capacitor, I used a scrap metal sheet and a 1 Mohm resistor. I chose the 1 Mohm
+            resistor according to the capacitive sensor library documentation (https://playground.arduino.cc/Main/CapacitiveSensor/index-2.html)
+            to respond to absolute touch.
+            For the high-load output device, I used the LED strips.
+        </p>
+      </div>
+    </div>
+
+    <div class="header">
+      <iframe class="header" src="https://youtube.com/embed/mRIG4EKf0f4?" allowfullscreen></iframe>
+      <div>
+        <h2>Circuit Video </h2>
+        <h3>(Full Screen Allowed)</h1>
+        <p>When the capacitive sensor is touched, the send and recieve pin of the capacitor
+            time how long it takes for the recieve pin to match the send pin, which will return
+            larger or smaller numbers. The code maps these numbers to 0-255, which will be written
+            to the gate pin (9) of the transistor. This will turn the LED strip on to the associated
+            brightness.
+        </p>
+      </div>
+    </div>
+
+    <br>
+    <h2>Arduino Code Sketch</h2>
+    <p>In my code, I included the capacitive sensor library and set up the capacitive sensor pins,
+      as well as the gatepin for the N-MOSFET transistor. After getting a reading from the sensor,
+      the code constrains the input to a min and max, and then maps it to brightnesses between
+      0 and 255 in order to write that to the gate pin and change the brightness of the LEDs.
+    </p>
+
+    <div class="header">
+      <pre>
+        <code>
+//includes library in code
+#include &lt;CapacitiveSensor.h&gt; 
+//sets variables for pins
+int gatepin = 9;
+//sets pins 4 and 2 and sending and receiving pins
+CapacitiveSensor cs = CapacitiveSensor(4,2);
+
+void setup() {
+  //turns off autocalibrate
+  cs.set_CS_AutocaL_Millis(0xFFFFFFFF);
+  //initializes gatepin as output
+  pinMode(gatepin, OUTPUT);
+}
+
+void loop() {
+  //creates a long variable to store milliseconds since starting
+  long start = millis();
+  //gets reading from capacitive sensor with 30 samples
+	long output =  cs.capacitiveSensor(30);
+  //constrains the reading from the capacitive sensor to 70 and 1800
+  int constrainedInput = constrain(output, 80, 1700);
+  //maps the reading fro the capacitive sensor to angles for the servo motor
+  int brightness = map(constrainedInput, 80, 1700, 0, 255);
+
+  //writes the brightness to the gatepin, which will turn on the LED to the brightness
+  analogWrite(gatepin, brightness);
+  //delays for 2/100 of a second
+  delay(20);
+}
+        
+        </code>
+      </pre>
+    </div>
+
+    <br>
+    <h2>Additional Questions:</h2>
+
+    <div class="qna">
+      <h3>1: This is the datasheet for the n-mosfet transistor:
+        https://www.diodes.com/assets/Datasheets/DMT6009LCT.pdLinks to an
+        external site.f What is the absolute maximum amount of current between pins 2 and 3?
+      </h3>
+      <div>
+        <img src="a4_qna_q1_2.png"/>
+      </div>
+      <h3>2: Draw a schematic for a circuit with using at least your arduino, a DC motor,
+        a flyback diode, and capacitors between power and ground. Find parts with datasheets
+        you could use for each of these schematic components.
+      </h3>
+      <pre>
+//creates long variable to sum inputs
+long sum = 0;
+
+//sums up last 15 readings at a time
+for (int i=0; i&lt;15; i++) {
+    long input =  cs.capacitiveSensor(30);
+    sum = sum + input;
+    delay(100);
+}
+
+//creates variable for smoothedInput
+int smoothedInput = (sum/15);
+
+----OR----
+
+//prevent too-high or too-low values
+int constInput = constrain(input, min, max);
+
+//now use the above smoothing code.
+      </pre>
+      <h3>3: Here is the datasheet for the L293D chip: https://www.ti.com/product/L293D
+        Draw a schematic using at least your arduino, this chip, and two motors. Write (pseudo)
+        code that shows how you would move the motors both forward, both back, then one forward
+        one back, and one back then forward.
+      </h3>
+      <pre>
+//this can also be addressed via smoothing.
+//creates long variable to sum inputs
+long sum = 0;
+
+//sums up last 15 readings at a time
+for (int i=0; i&lt;15; i++) {
+    long input =  cs.capacitiveSensor(30);
+    sum = sum + input;
+    delay(100);
+}
+
+//creates variable for smoothedInput
+int smoothedInput = (sum/15);
+      </pre>
+    </div>
+  </body>
+</html>
