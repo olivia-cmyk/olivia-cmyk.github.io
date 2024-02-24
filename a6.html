@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+    <title>Shi-Wen Olivia Yau's HCDE 439 Physical Computing Page!</title>
+
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <h1>Shi-Wen Olivia Yau's Assignment 6</h1>
+    <div class="header">
+      <img src="a6_schematic.jpg"/>
+      <div>
+        <h2>Schematic</h2>
+        <p>My schematic has 2 buttons (Inputs) and 3 LEDs (Outputs). Each button is connected to 
+          an analog pin that reads the state of the button, while each LED is connected to a 
+          digital pin that controls whether the LED is on or off. 
+        </p>
+      </div>
+    </div>
+
+    <div class="header">
+      <img src="a6_circuitimage.jpg" />
+      <div>
+        <h2>Circuit Image</h2>
+        <p>Each button has a 10k ohm resistor that I chose because I wanted to button to be a 
+          pull-down resistor because it prevents short circuiting while the button is pushed down and
+          pulls down the input to ground when the button is not pushed.
+          <br>
+          For my LEDs, I chose 220 ohm resistors for each of them. 
+          <pre>
+Red LED:
+5 - 1.8V = ? Amperes * 220 Ohms
+I = 14.5 mA
+
+Green/Blue LED:
+5 - 3.3V = ? Amperes * 220 Ohms
+I = 7.7 mA
+          </pre>
+        </p>
+      </div>
+    </div>
+
+    <div class="header">
+      <iframe class="header" src="https://youtube.com/embed/y3smfv1eJAQ" allowfullscreen></iframe>
+      <div>
+        <h2>Circuit Video </h2>
+        <h3>(Full Screen Allowed)</h1>
+        <p>When button 1 is pushed, the arduino uses Serial.print to write "High" to the serial
+          monitor. When button 2 is pushed, it writes "Gray". A function in p5 reads this and
+          changes the background color of the sketch depending on what it reads. When button 1 is 
+          pushed, it changes the background color to a random color. When button 2 is pushed, the
+          background color returns to the default light gray. 
+          <br>
+          When the user uses the mouse to click on an LED, p5 uses port.write to write a 
+          predetermined single byte (0 to 255) to the serial monitor. This is read by the arduino sketch
+          using Serial.read. Depending on the byte that is read, it will turn the corresponding
+          LED on or off. The code that uses port.write to turn the actual LEDs on/off will also
+          change the color of the p5sketch LED so that it matches the real life LED.
+        </p>
+      </div>
+    </div>
+
+    <br>
+    <h2>Arduino Code Sketch</h2>
+    <p>First, I defined my global variables, initialized the pins, and started the serial monitor.
+      Then, I used variables to store the state of my buttons and used them to write to the serial
+      monitor if they were pushed. Finally, I used Serial.read() to check what was being written
+      to the monitor. If it was a byte that the code recognized, it would turn on/off the corresponding
+      LED using digitalWrite().
+    </p>
+
+    <div class="header">
+      <pre>
+        <code>
+//defining variables
+int redpin = 5;
+int bluepin = 7;
+int greenpin = 11;
+int buttonpin = A0;
+int buttonState = 0;
+int button2pin = A3;
+int button2State = 0;
+int incomingByte = 0;
+
+void setup() {
+  //initializing pins as INPUTs or OUTPUTs
+  pinMode(redpin, OUTPUT);
+  pinMode(bluepin, OUTPUT);
+  pinMode(greenpin, OUTPUT);
+  pinMode(buttonpin, INPUT);
+  pinMode(button2pin, INPUT);
+
+  //begining serial monitor
+  Serial.begin(9600);
+
+}
+
+void loop() {
+  //setting variables to read the state of the button (high or low)
+  buttonState = digitalRead(buttonpin);
+  button2State = digitalRead(button2pin);
+
+  //if the first button is pressed, print "High" to serial monitor
+  if (buttonState == HIGH) {
+    Serial.print("High\n");
+  }
+
+  //if second button is pressed, print "Low" to serial monitor
+  //when the p5 sketch reads these, it will change the background color
+  if (button2State == HIGH) {
+    Serial.print("Gray\n");
+  }
+
+  //if there is data in the serial monitor (number of bytes is > 0)
+  if (Serial.available() > 0) {
+    // read the incoming byte and set to variable
+    incomingByte = Serial.read();
+
+    //if byte is a certain number, turn on/off the associated LED
+    //this reads from the p5 sketch that sends single bytes to the monitor
+    if (incomingByte == 1) {
+      digitalWrite(redpin, HIGH);
+    }
+    if (incomingByte == 2) {
+      digitalWrite(redpin, LOW);
+    }
+    if (incomingByte == 3) {
+      digitalWrite(bluepin, HIGH);
+    }
+    if (incomingByte == 4) {
+      digitalWrite(bluepin, LOW);
+    }
+    if (incomingByte == 5) {
+      digitalWrite(greenpin, HIGH);
+    }
+    if (incomingByte == 6) {
+      digitalWrite(greenpin, LOW);
+    }
+  }
+
+  //1 second delay
+  delay(1000);
+}
+                  </code>
+      </pre>
+    </div>
+    <h2>P5 Code Sketch (p5.js)</h2>
+    <p>First, I setup class LED that passed a lot of variables through (such as x, y position,
+      color of the LED, the byte code for turning it on/off, and the radius). The class had 
+      functions to display/draw the LEDs and turn them "on" or "off" by changing the color of
+      the LED and writing to the serial monitor (port.write) the single byte that would be read
+      by the arduino code. The function readingMonitor was also set up to read the serial monitor
+      for "High\n" and "Gray\n" which would trigger a change in the sketch's background color.
+      To set up the serial monitor, I utilized https://github.com/gohai/p5.webserial
+      and the helper functions from Hannah's examples. I also set up functions for mousePressed, which
+      turned the LEDs on and off when the mouse clicked on them, and randomC, which returns a 
+      random color.
+      <br>
+      (Link to sketch here: https://editor.p5js.org/olivia-cmyk/sketches/6FGO9GEO3)
+    </p>
+
+    <div class="header">
+      <pre>
+        <code>
+//defining Baud rate, same as arduino sketch
+const BAUD_RATE = 9600;
+//defining global variables
+let port, connectBtn, Led1, Led2, Led3;
+//defining default background color
+let backing = 220;
+
+function setup() {
+  //calling setupSerial function
+  setupSerial();
+  //creating 400x400 canvas
+  createCanvas(400, 400);
+  
+  //creating new instances of Led class
+  Led1 = new Led(100, 200, 80, "grey", "rgb(231,126,126)", "grey",1,2);
+  Led2 = new Led(200, 200, 80, "grey", "lightblue", "grey",3,4);
+  Led3 = new Led(300, 200, 80, "grey", "lightgreen", "grey",5,6);
+
+}
+
+function draw() {
+  // Check if port is open
+  const portIsOpen = checkPort();
+  // If the port is not open, exit the draw loop
+  if (!portIsOpen) return;
+
+  //drawing the LEDs
+  background(backing);
+  Led1.display();
+  Led2.display();
+  Led3.display();
+  
+  //calling function that reads the serial monitor
+  readingMonitor()
+
+}
+
+function readingMonitor() {
+  //function that reads serial monitor
+  //makes variable that reads a line until a new line begins
+  let reading = port.readUntil("\n");
+  
+  //if the function reads "High" from the serial monitor...
+  if (str(reading) == "High\n") {
+    //the background turns a random color
+    backing = randomC();
+  }
+  //if the function reads "Gray" from the monitor...
+  if (str(reading) == "Gray\n") {
+    //the background turns back to default light gray
+    backing = 220;
+  }
+}
+
+function randomC() {
+  //function that helps choose a random color
+  //creates array of possible colors
+  let colors = ["red","pink", "hotpink", "orange","yellow","lightyellow", "blue", "lightblue", "green", "darkgreen", "lightgreen","purple","violet", "indigo", "black"]
+  
+  //returns a random color from the array
+  let chosen = random(colors);
+  return chosen;
+}
+
+function mousePressed() {
+  //function that determines what happens when a mouse is pressed
+  //calls function clicked() in class LED
+  //when mouse is pressed on the Led, it turns on/off (changes color)
+  Led1.clicked();
+  Led2.clicked();
+  Led3.clicked();
+}
+
+class Led {
+  
+  //defines constructor function and class-specific variables
+  constructor(x, y, diameter, c, onC, offC, onKey, offKey) {
+    this.x = x;
+    this.y = y;
+    this.d = diameter; //diameter of the LED, should be 80
+    this.c = c; //color
+    this.onC = onC;
+    this.offC = offC;
+    this.onKey = onKey;
+    this.offKey = offKey;
+  }
+  
+  //function that draws the actual LED
+  display() {
+    strokeWeight(1.5);
+    fill(this.c);
+    arc(this.x, this.y, this.d, this.d, 3 * QUARTER_PI, QUARTER_PI, CHORD);
+    line(this.x - 14, 229, this.x - 14, 280);
+    line(this.x + 12, 229, this.x + 12, 310);
+  }
+  
+  //function that turns LED on/off. Is called in mousePressed()
+  clicked() {
+    
+    //if the distance between where the mouse is and where the center
+    //of the LED is less than the radius of LED...
+    if (dist(this.x, this.y, mouseX, mouseY) < (this.d/2)) {
+      
+      //if the LED is off (has the off color)
+      if (this.c == this.offC) {
+        this.c = this.onC; //change the color to on color
+        
+        //write to port the onKey (single byte that the arduino reads)
+        port.write(this.onKey);
+      }
+      
+      //else if LED is on
+      else if (this.c == this.onC) {
+        this.c = this.offC; //change color to off color
+        
+        //write to port offKey (single byte that arduino reads)
+        port.write(this.offKey);
+      }
+    }
+  }
+}
+
+
+//Serial Port helper functions
+//from Hannah's examples and https://github.com/gohai/p5.webserial
+function setupSerial() {
+  port = createSerial();
+
+  // Check to see if there are any ports we have used previously
+  let usedPorts = usedSerialPorts();
+  if (usedPorts.length > 0) {
+    // If there are ports we've used, open the first one
+    port.open(usedPorts[0], BAUD_RATE);
+  }
+
+  // create a connect button
+  connectBtn = createButton("Connect to Arduino");
+  connectBtn.position(5, 5); // Position the button in the top left of the screen.
+  connectBtn.mouseClicked(onConnectButtonClicked); // When the button is clicked, run the onConnectButtonClicked function
+}
+
+function checkPort() {
+  if (!port.opened()) {
+    // If the port is not open, change button text
+    connectBtn.html("Connect to Arduino");
+    // Set background to gray
+    background("gray");
+    return false;
+  } else {
+    // Otherwise we are connected
+    connectBtn.html("Disconnect");
+    return true;
+  }
+}
+
+function onConnectButtonClicked() {
+  // When the connect button is clicked
+  if (!port.opened()) {
+    // If the port is not opened, we open it
+    port.open(BAUD_RATE);
+  } else {
+    // Otherwise, we close it!
+    port.close();
+  }
+}
+        </code>
+      </pre>
+    </div>
+  </body>
+</html>
