@@ -15,7 +15,209 @@
     <h2>Project Proposal</h2>
     <div class="header">
       <img src="finalproject_proposal.png"/>
+      <img src="final_procedure.png"/>
     </div>
 
+  <br>
+  <br>   
+    <div class="header">
+      <img src="final_sketch.jpg"/>
+      <div>
+        <h2>Concept Description</h2>
+        <p>A chest tube insertion trainer for medical staff to sense when they have
+          gone too deep in their incision/puncture during the procedure. Chest
+          tube insertion involves cutting into the chest wall, puncturing the parietal
+          pleura, and inserting a tube into the pleural space.
+        </p>
+      </div>
+    </div>
+
+    <div class="header">
+      <pre>
+Electronic Parts
+  1R, 1B, 1G LED
+  3x220 ohm resistors, 1x10Mohm resistor, 1x10Kohm resistor
+  Button
+  Arduino, Perf Board, Solder
+3D Printed Parts
+  Hatchbox Filament (for enclosure and ribs)
+Silicone Parts
+  Subcutaneous = Ecoflex Gel 00
+  Parietal Pleura  = P70 Silicone
+  Sil Pig and flocking for coloring
+  Silicone Deadner
+  Baby Powder
+Other Components
+  Curved Kelly clamps
+  Aluminum Foil
+  Plastic tube
+      </pre>
+      <div>
+        <h2>Bill of Materials</h2>
+        <p>The only component I needed to purchase were the 10 Mohm resistors. However, if I were
+          to redo this project, I would likely attempt to use a weaker resistor.
+        </p>
+      </div>
+    </div>
+
+    <div class="header">
+      <img src="final_schematic.jpg"/>
+      <div>
+        <h2>Schematic</h2>
+        <p>For this schematic, each LED is connected to its own pin and resistor. The button
+          is also connected to its own pin to sense whether it is pressed or not, as well as a 10k
+          ohm resistor (chosen to act as a pulldown resistor), and 5V power. The capacitive sensor is
+          connected to a 10M ohm resistor (so that it will sense a few inches away from the sensor) and 2 pins,
+          a sending and receiving pin.
+        </p>
+      </div>
+    </div>
+
+    <br>
+    <br>
+    <h2>Circuit + Soldering</h2>
+    <div class="header">
+      <img src="final_circuitimage_2.jpg"/>
+      <img src="final_circuitimage_3.jpg"/>
+    </div>
+
+    <br>
+    <br>
+    <h2>Code</h2>
+    <p>
+1) Set up variables and capacitive sensor library <br>
+2) Initialize pins as OUTPUTs and INPUTs, begin serial monitor, and calibrate the capacitive sensor<br>
+3) Create a for loop that smoothes the input from the capacitive sensor<br>
+4) Depending on the input, a different LED will turn on/off<br>
+5) When the button is pressed, the capacitive sensor will recalibrate itself.<br>
+    </p>
+    <br>
+    <pre>
+#include &lt;CapacitiveSensor.h&gt;
+
+//1 megohm resistor between pins 2 & 5 with pin 5 as the sensor
+CapacitiveSensor cs = CapacitiveSensor(2, 5);
+const int buttonpin = 7;
+int buttonstate = LOW;
+int redled = 9;
+int greenled = 10;
+int blueled = 11;
+
+
+void setup() {
+  //turns off autocalibrate
+  cs.set_CS_AutocaL_Millis(0xFFFFFFFF);
+  //begins serial monitor
+  Serial.begin(9600);
+
+  //initialize pins, and calibrate the sensor
+  pinMode(redled, OUTPUT);
+  pinMode(greenled, OUTPUT);
+  pinMode(blueled, OUTPUT);
+  cs.reset_CS_AutoCal();
+}
+
+void loop() {
+
+  //gets reading from capacitive sensor with 30 samples
+  long smoothOutput = 0;
+
+  
+  // for 5 readings, add up the inputs from the cs
+  for (int i=0; i < 5; i++) {
+    long output = cs.capacitiveSensor(30);
+    smoothOutput = smoothOutput + output;
+  }
+
+  //divide the summed input by 5 to get it to smooth out
+  smoothOutput = smoothOutput / 5;
+
+  //if the button is pressed, reset the capacitive sensor
+  buttonstate = digitalRead(buttonpin);
+  if (buttonstate == HIGH) {
+    cs.reset_CS_AutoCal();
+  }
+
+  //turns on the correct LED depending on the reading from the cs
+  if (smoothOutput > 10000) { //too close
+    digitalWrite(redled, HIGH);
+    digitalWrite(blueled, LOW);
+    digitalWrite(greenled, LOW);
+  } else if (smoothOutput > 2000 && smoothOutput < 10000) { //just right
+    digitalWrite(redled, LOW);
+    digitalWrite(blueled, LOW);
+    digitalWrite(greenled, HIGH);  
+  } else { //too far away
+    digitalWrite(redled, LOW);
+    digitalWrite(blueled, HIGH);
+    digitalWrite(greenled, LOW);
+  }
+
+  //print sensor output
+  Serial.println(smoothOutput);
+
+  //delay
+  delay(500);
+
+}
+
+    </pre>
+
+    <br>
+    <br>
+    <h2>Technical Writeup: Physical Components</h2>
+    <h3>To Make the Silicone</h3>
+    <p>I mixed part A with pigments and flocking to obtain the correct color, then I mixed in part B.
+      For the P70, the ratio of part A to B is 10:1. For the Ecoflex Gel 00, the ratio of part A to B is 1:1.
+      After, I degassed the mixture in a vacuum chamber and poured into a tray from a high height to get rid of remaining
+      bubbles. After a few hours, the silicone set. For the skin, I brushed baby powder on one side to make it smooth.
+      The capacitive sensor itself was a silicone lung-shaped object
+      wrapped in aluminum foil. For the purposes of this project, any lung-shaped object wrapped in foil that can be clipped with
+      an alligator clip will work.
+    </p>
+
+    <div class="header">
+      <img src="final_component_2.jpg"/>
+      <img src="final_component_1.jpg"/>
+    </div>
+    <h3>To Make the Enclosure</h3>
+    <p>I 3D-printed the enclosure using white Hatchbox PLA filament on a Prusa. To model it, I used
+      SolidWorks and created a box with an opening to contain the arduino/perfboard,
+      a lid with holes to show the LEDs and utilize the button, and a stick for the button to be pressed.
+      To create it, I had to measure the dimensions of the arduino and placements of the LEDs with calipers and tolerance the drawing.
+      The ribs were also 3D printed a while ago using SolidWorks. For exact dimensions, download the STL files here:
+      <a href="PhysicalComputing_Enclosure.STL" download="ShiWenOliviaYau_439Enclosure">Enclosure</a>, 
+      <a href="PhysicalComputing_Cover.STL" download="ShiWenOliviaYau_439Cover">Cover</a>, 
+      <a href="PhysicalComputing_Button.STL" download="ShiWenOliviaYau_439Button">Button</a>.
+    </p>
+    <div class="header">
+      <img src="final_component_3.jpg"/>
+      <img src="final_component_4.jpg"/>
+    </div>
+    <div class="header">
+      <div class="header">
+      <img src="final_component_5.jpg"/>
+      <img src="final_3d_1.png"/>
+      </div>
+      <img src="final_3d_2.png"/>
+    </div>
+    <br>
+    <br>
+
+    <h2>Final Product & Video Demo</h2>
+    <p>The final product was (from deep to superficial) aluminum-covered silicone lungs, 3D printed ribs,
+      silicone parietal pleura, and silicone subcutaneous + skin + baby powder. When the metal Kelly clamps
+      get close to the lungs, the capacitive sensor senses it, smoothes it, and writes a long variable 
+      to the serial monitor. This code turns on the correct LED according to this number and turns the other LEDs off.
+      When the button is pressed, the capacitive sensor is re-calibrated.
+    </p>
+    <div class="header">
+      <img src="final_productimage_2.jpg"/>
+      <img src="final_productimage_1.jpg"/>
+    </div>
+
+    <div class="qna">
+      <iframe width=100% height="300" src="https://www.youtube.com/embed/q08TrzgF28M?si=Ga7wHJNXtPErh4VY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      <iframe width=100% height="300" src="https://www.youtube.com/embed/Suy79kVe2Jc?si=KUzsbcFsQPJxoCeJ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>    </div>
   </body>
 </html>
